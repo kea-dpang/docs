@@ -1,0 +1,18 @@
+# 요구사항 2번) 장바구니 삭제
+
+1. 사용자는 장바구니 항목을 삭제할 수 있어야 한다.
+
+```mermaid
+sequenceDiagram
+    participant User as 사용자
+    participant WebPage as 웹페이지
+    participant Server as 서버
+    participant Database as 데이터베이스
+
+    User ->> WebPage: 상품 장바구니에서 삭제 버튼 클릭
+    WebPage ->> Server: 장바구니 업데이트 요청
+    Server ->> Database: 장바구니 데이터 삭제
+    Database -->> Server: 삭제 결과 반환
+    Server -->> WebPage: 요청 결과 반환
+    WebPage -->> User: 장바구니 업데이트 완료 확인
+```
