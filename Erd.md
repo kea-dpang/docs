@@ -38,17 +38,18 @@ erDiagram
 erDiagram
     user {
         bigint user_id PK "사용자 ID"
+        varchar(255) email "사용자 이메일"
         enum status "활성화 상태"
-        datetime(6) created_at "생성 날짜"
-        datetime(6) updated_at "변경 날짜"
+        datetime(6) created_time "생성 날짜"
+        datetime(6) updated_time "변경 날짜"
     }
 
     user_detail {
+        bigint user_detail_id PK "사용자 상세 ID"
         bigint user_id FK "사용자 ID"
         int employee_number "사원 번호"
         date(3) hire_date "입사 날짜"
         varchar(20) name "이름"
-        varchar(320) email "이메일 (ID)"
         varchar(15) phone_number "전화번호"
         varchar(5) zip_code "우편번호"
         varchar(255) address "주소"
@@ -56,33 +57,35 @@ erDiagram
     }
 
     user_withdrawal {
+        bigint user_withdrawal_id PK "유저 탈퇴 아이디"
         bigint user_id FK "사용자 ID"
         enum withdrawal_reason "탈퇴 사유"
         varchar(500) message "남길 말씀"
         datetime(6) withdrawal_date "탈퇴 날짜"
     }
 
-    cart_item {
-        bigint cart_item_id PK "장바구니 아이템 ID"
+    cart {
+        bigint cart_id PK "장바구니 ID"
         bigint user_id FK "사용자 ID"
         bigint item_id FK "상품 ID"
         int quantity "수량"
         datetime(6) added_at "추가된 날짜"
     }
 
-    wishlist_item {
+    wishlist {
         bigint wishlist_item_id PK "위시리스트 아이템 ID"
         bigint user_id FK "사용자 ID"
         bigint item_id FK "상품 ID"
         datetime(6) added_at "추가된 날짜"
     }
 
-    user ||--o{ cart_item: ""
-    user ||--o{ wishlist_item: ""
+    user ||--|| cart: ""
+    user ||--|| wishlist: ""
     user ||--o| user_withdrawal: ""
     user ||--|| user_detail: ""
-    item ||--o| cart_item: ""
-    item ||--o| wishlist_item: ""
+    item }|--|{ cart: ""
+    item }|--|{ wishlist: ""
+
 ```
 
 ## 마일리지 서비스
@@ -98,6 +101,7 @@ erDiagram
         bigint user_id FK "사용자 ID"
         int mileage "사원 마일리지"
         int personal_charged_mileage "개인 충전 마일리지"
+        date(6) join_date "가입 날짜"
         datetime(6) updated_at "업데이트 날짜"
     }
 
@@ -138,17 +142,17 @@ erDiagram
 
 ```mermaid
 erDiagram
-    order {
+    orders {
         bigint order_id PK "주문 번호"
         bigint user_id FK "사용자 ID"
-        enum status "주문 및 배송 상태"
         varchar(500) delivery_request "배송시 요청사항"
-        int payment_amount "결제 금액"
-        datetime(6) created_at "생성 날짜"
+        int product_payment_amount "결제 금액"
+        int delivery_fee "배송비"
+        datetime(6) order_date "생성 날짜"
         datetime(6) updated_at "변경 날짜"
     }
 
-    order_recipient {
+    order_recipients {
         bigint order_id FK "주문 번호"
         varchar(20) receiver_name "받는 사람"
         varchar(15) receiver_phone_number "받는 사람 전화번호"
@@ -157,16 +161,17 @@ erDiagram
         varchar(255) receiver_detail_address "받는 사람 상세 주소"
     }
 
-    order_detail {
+    order_details {
         bigint order_detail_id PK "주문 상세 ID"
-        bigint order_id FK "주문 ID"
-        bigint item_id FK "상품 ID"
+        bigint order_id FK "주문 번호"
+        enum status "주문 및 배송 상태"
+        bigint item_id "상품 ID"
         int quantity "수량"
         datetime(6) created_at "생성 날짜"
         datetime(6) updated_at "변경 날짜"
     }
 
-    refund {
+    order_refunds {
         bigint refund_id PK "환불 ID"
         bigint order_detail_id FK "주문 상세 ID"
         enum refund_reason "환불 사유"
@@ -177,7 +182,8 @@ erDiagram
         enum refund_status "환불 상태"
     }
 
-    recall {
+    order_recalls {
+        bigint recall_id PK "회수 정보 ID"
         bigint refund_id FK "환불 ID"
         varchar(20) retriever_name "회수자 명"
         varchar(15) retriever_phone_number "회수자 연락처"
@@ -185,21 +191,20 @@ erDiagram
         varchar(500) retrieval_message "회수 메시지"
     }
 
-    cancel {
+    order_cancels {
         bigint cancel_id PK "취소 ID"
         bigint order_id FK "주문 ID"
-        enum cancel_reason "취소 사유"
         datetime(6) cancel_request_date "취소 요청 날짜"
         datetime(6) cancel_complete_date "취소 완료 날짜"
     }
 
-    order ||--|{ order_detail: ""
-    order_detail ||--o| refund: ""
-    order ||--|| order_recipient: ""
-    order_detail ||--o| cancel: ""
-    refund ||--|| recall: ""
-    user ||--|{ order: ""
-    item ||--|| order_detail: ""
+    orders ||--|{ order_details: ""
+    order_details ||--o| order_refunds: ""
+    orders ||--|| order_recipients: ""
+    order_details ||--o| order_cancels: ""
+    order_refunds ||--|| order_recalls: ""
+    user ||--o{ orders: ""
+    item ||--o| order_details: ""
 
 ```
 
@@ -224,47 +229,45 @@ erDiagram
 
 ```mermaid
 erDiagram
-    item {
+    items {
         bigint item_id PK "상품 ID"
         bigint seller_id FK "판매처 ID"
-        varchar(255) name "상품명"
-        int price "상품 가격"
+        bigint event_id FK "이벤트 ID"
+        varchar(255) item_name "상품명"
+        int item_price "상품 가격"
         enum category "카테고리"
         enum sub_category "상세 카테고리"
-        int stock_quantity "재고량"
-        int review_count "리뷰 개수"
         float average_rating "평균 평점"
+        int stock_quantity "재고 수량"
+        int review_count "리뷰 개수"
+        int discountRate "할인율"
+        int discountPrice "할인가"
+        varchar(500) description "상품 상세 설명"
+        varchar(255) thumbnail_image "상품 썸네일 사진"
         datetime(6) created_at "생성 날짜"
         datetime(6) updated_at "변경 날짜"
     }
 
-    item_image {
-        bigint information_id PK "이미지 ID"
-        bigint item_id FK "상품 ID"
-        varchar(255) image_url "이미지 URL"
-    }
-
-    item_discount {
-        bigint item_id FK "상품 ID"
-        int discount_rate "할인율"
-        int discount_price "할인 가격"
-    }
-
-    item_review {
+    reviews {
         bigint item_review_id PK "리뷰 ID"
         bigint reviewer_id FK "리뷰 작성자 ID"
         bigint item_id FK "상품 ID"
         varchar(500) review_content "리뷰 내용"
         int rating "평점"
-        datetime(6) created_at "생성 날짜"
-        datetime(6) updated_at "변경 날짜"
+        datetime(6) created_time "생성 날짜"
+        datetime(6) updated_time "변경 날짜"
     }
 
-    item ||--|{ item_image: ""
-    item ||--|| item_discount: ""
-    item ||--o{ item_review: ""
-    seller ||--|{ item: ""
-    user ||--o{ item_review: ""
+    item_information_images {
+        bigint item_id FK "상품 ID"
+        string information_images "상품 정보 사진"
+    }
+
+    items ||--o{ item_information_images: ""
+    items ||--o{ reviews: ""
+    seller ||--|{ items: ""
+    event |o--|{ items: ""
+    user ||--o{ reviews: ""
 ```
 
 ## FAQ 서비스
@@ -285,8 +288,8 @@ erDiagram
         varchar(1000) question "질문"
         varchar(1000) answer "답변"
         enum category "카테고리"
-        datetime(6) created_at "생성 날짜"
-        datetime(6) updated_at "변경 날짜"
+        datetime(6) created_time "생성 날짜"
+        datetime(6) updated_time "변경 날짜"
     }
     user ||--o{ faq: ""
 ```
@@ -315,13 +318,13 @@ erDiagram
         bigint qna_id PK "문의 ID"
         bigint author_id FK "문의 작성자 ID"
         bigint responder_id FK "답변자 ID"
-        enum category "문의 카테고리"
+        bigint item_id FK "상품 ID"
         varchar(100) title "문의 제목"
-        varchar(1000) question "문의 내용"
+        enum category "문의 카테고리"
+        varchar(1000) content "문의 내용"
         varchar(1000) answer "문의 답변"
-        varchar(255) attachment_url "첨부 사진 링크"
         enum state "문의 상태"
-        enum is_public "공개 여부"
+        varchar(255) attachment_url "첨부 사진 링크"
         datetime(6) created_at "생성 날짜"
         datetime(6) updated_at "변경 날짜"
     }
@@ -343,18 +346,18 @@ erDiagram
 erDiagram
     event {
         bigint event_id PK "이벤트 ID"
-        datetime(6) registration_date "이벤트 등록일"
         varchar(100) event_name "이벤트 이름"
         varchar(255) image_path "이벤트 이미지 경로"
         enum event_status "이벤트 상태"
-        enum event_type "이벤트 종류"
+        double discount_rate "이벤트 할인율"
+        datetime(6) registration_date "이벤트 등록일"
         date(3) start_date "이벤트 시작일"
         date(3) end_date "이벤트 종료일"
-        double discount_rate "이벤트 할인율"
     }
 
     event_item {
         bigint event_id PK "이벤트 ID"
+        bigint item_id FK "상품 ID"
     }
 
     event_seller {
@@ -381,18 +384,19 @@ erDiagram
 ```mermaid
 erDiagram
     seller {
-        bigint seller_id PK "판매처 식별자"
-        varchar(20) seller_manager "담당자"
-        date contract_expiry_date "계약 만료일"
-        text note "비고"
-    }
-
-    seller_detail {
-        bigint seller_id FK "판매처 식별자"
+        bigint seller_id PK "판매처 ID"
         varchar(15) seller_phone_number "판매처 연락처"
         varchar(100) sales_name "판매처명"
         varchar(20) seller_staff "판매처 담당 직원"
     }
+
+  seller_detail {
+      bigint seller_detail_id PK "판매처 세부 ID"
+      bigint seller_id FK "판매처 ID"
+      varchar(20) seller_manager "담당자"
+      date contract_expiry_date "계약 만료일"
+      text note "비고"
+  }
 
     seller ||--|| seller_detail: ""
 
