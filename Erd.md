@@ -16,6 +16,7 @@ erDiagram
         datetime(6) created_at "생성 날짜"
         datetime(6) updated_at "변경 날짜"
     }
+   user ||--|| auth: ""
 ```
 
 ## 사용자 서비스
@@ -30,16 +31,11 @@ erDiagram
     * 7: 신뢰도 불만
     * 8: 퇴사
 
-- **활성화 상태**
-    * 1: 회원
-    * 2: 탈퇴
-
 ```mermaid
 erDiagram
     user {
         bigint user_id PK "사용자 ID"
         varchar(255) email "사용자 이메일"
-        enum status "활성화 상태"
         datetime(6) created_time "생성 날짜"
         datetime(6) updated_time "변경 날짜"
     }
@@ -48,7 +44,7 @@ erDiagram
         bigint user_detail_id PK "사용자 상세 ID"
         bigint user_id FK "사용자 ID"
         int employee_number "사원 번호"
-        date(3) hire_date "입사 날짜"
+        datetime(6) join_date "입사 날짜"
         varchar(20) name "이름"
         varchar(15) phone_number "전화번호"
         varchar(5) zip_code "우편번호"
@@ -58,7 +54,6 @@ erDiagram
 
     user_withdrawal {
         bigint user_withdrawal_id PK "유저 탈퇴 아이디"
-        bigint user_id FK "사용자 ID"
         enum withdrawal_reason "탈퇴 사유"
         varchar(500) message "남길 말씀"
         datetime(6) withdrawal_date "탈퇴 날짜"
@@ -67,24 +62,20 @@ erDiagram
     cart {
         bigint cart_id PK "장바구니 ID"
         bigint user_id FK "사용자 ID"
-        bigint item_id FK "상품 ID"
-        int quantity "수량"
-        datetime(6) added_at "추가된 날짜"
     }
 
-    wishlist {
-        bigint wishlist_item_id PK "위시리스트 아이템 ID"
-        bigint user_id FK "사용자 ID"
-        bigint item_id FK "상품 ID"
-        datetime(6) added_at "추가된 날짜"
-    }
+   cart_item {
+      bigint cart_item_id PK "장바구니-상품 ID"
+      bigint cart_id FK "장바구니 ID"
+      bigint item_id "상품 ID"
+      int quantitu "수량"
+   }
 
     user ||--|| cart: ""
-    user ||--|| wishlist: ""
     user ||--o| user_withdrawal: ""
     user ||--|| user_detail: ""
-    item }|--|{ cart: ""
-    item }|--|{ wishlist: ""
+    cart ||--|{ cart_item: ""
+    item }|--|| cart_item: ""
 
 ```
 
