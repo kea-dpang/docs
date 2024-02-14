@@ -144,7 +144,7 @@ erDiagram
     }
 
     order_recipients {
-        bigint order_id FK "주문 번호"
+        bigint order_id FK "주문 ID"
         varchar(20) receiver_name "받는 사람"
         varchar(15) receiver_phone_number "받는 사람 전화번호"
         varchar(5) receiver_zip_code "받는 사람 우편번호"
@@ -155,11 +155,10 @@ erDiagram
     order_details {
         bigint order_detail_id PK "주문 상세 ID"
         bigint order_id FK "주문 번호"
+        bigint item_id FK "상품 ID"
         enum status "주문 및 배송 상태"
-        bigint item_id "상품 ID"
+        int purchase_price "구매 금액"
         int quantity "수량"
-        datetime(6) created_at "생성 날짜"
-        datetime(6) updated_at "변경 날짜"
     }
 
     order_refunds {
@@ -187,6 +186,7 @@ erDiagram
         bigint order_id FK "주문 ID"
         datetime(6) cancel_request_date "취소 요청 날짜"
         datetime(6) cancel_complete_date "취소 완료 날짜"
+        int refund_amount "환불 예정액"
     }
 
     orders ||--|{ order_details: ""
@@ -226,13 +226,13 @@ erDiagram
         bigint event_id FK "이벤트 ID"
         varchar(255) item_name "상품명"
         int item_price "상품 가격"
-        enum category "카테고리"
+        enum item_category "카테고리"
         enum sub_category "상세 카테고리"
         float average_rating "평균 평점"
         int stock_quantity "재고 수량"
         int review_count "리뷰 개수"
-        int discountRate "할인율"
-        int discountPrice "할인가"
+        int discount_rate "할인율"
+        int discount_price "할인가"
         varchar(500) description "상품 상세 설명"
         varchar(255) thumbnail_image "상품 썸네일 사진"
         datetime(6) created_at "생성 날짜"
