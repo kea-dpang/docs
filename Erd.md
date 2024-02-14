@@ -321,6 +321,7 @@ erDiagram
     }
 
     user ||--|{ qna: ""
+    items ||--o{ qna: ""
 ```
 
 ## 이벤트 서비스
