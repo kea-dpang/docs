@@ -3,7 +3,8 @@
 판매처 관리를 위한 판매처 수정 추가.
 
 ```mermaid
-participant Admin as 관리자
+sequenceDiagram
+    participant Admin as 관리자
     participant WebPage as 웹페이지
     participant Server as 서버
     participant Database as 데이터베이스
